@@ -18,6 +18,6 @@
 
 ---
 
-$\begin{tabular}{c|c|c}
-hi $ i'm $ juwon \\
-\end{tabular}$
+| 수강 과목 | 수강 시기 | 교수 |
+| ------- | ------- | --- |
+
