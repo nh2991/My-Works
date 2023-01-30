@@ -1,6 +1,6 @@
 # My PortFolio
 
-![KakaoTalk_Photo_2023-01-29-17-54-40](https://user-images.githubusercontent.com/123232681/215372135-8bb0bdc4-b332-403c-a63f-ee477a556daf.png)
+<img src="https://user-images.githubusercontent.com/123232681/215372135-8bb0bdc4-b332-403c-a63f-ee477a556daf.png" width="50%" height="50%">
 
 ---
 
