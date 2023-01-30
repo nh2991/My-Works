@@ -1,0 +1,61 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Note}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-01-13"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+$\hat{\beta_0} = \bar{y} - \hat{\beta_1} \bar{x}$, $\hat{\beta_1} = \frac{Sxy}{Sxx}$.
+
+\vspace{4mm}
+\noindent Residual Standard Error $S = \sqrt{\frac{1}{n-2} \sum^n_{i=1} \hat{e_i}^2} = \sqrt{\frac{1}{n-2} \sum^n_{i=1} [y_i - \hat{y_i}]} = \sqrt{\frac{1}{n-2} \sum^n_{i=1} [y_i - (\hat{\beta_0} + \hat{\beta_1} * x_i)]}$.
+
+\noindent $se(\hat{\beta_1}) = \frac{S}{\sqrt{Sxx}}$, $se(\hat{\beta_0}) = S \sqrt{(\frac{1}{n} + \frac{\bar{x}^2}{Sxx})}$.
+
+\vspace{4mm}
+\noindent 1. Confidence Interval for $\beta_1$: $\hat{\beta_1} \pm t_{\alpha/2,~n-2} * se(\hat{\beta_1})$.
+
+\noindent 2. Confidence Interval for $\beta_0$: $\hat{\beta_0} \pm t_{\alpha/2,~n-2} * se(\hat{\beta_0})$.
+
+\vspace{4mm}
+\noindent 1. Confidence Interval for mean $Y$ (regression line) at $X = x^*$: $\hat{y}^* \pm t_{\alpha/2,~n-2} * S \sqrt{(\frac{1}{n} + \frac{(x^* - \bar{x})^2}{Sxx})}$
+
+\noindent 2. Prediction Interval for Single $Y$ at $X = x^*$: $\hat{y}^* \pm t_{\alpha/2,~n-2} * S \sqrt{(1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{Sxx})}$
+
+\vspace{4mm}
+\noindent Note that One sample $t$-test for mean has statistic $T = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}$, where $s = \sqrt{\frac{Sxx}{n-1}}$,  
+and the confidence interval is $\bar{x} \pm t_{\alpha/2,~n-1} * \frac{s}{\sqrt{n}}$.
+
+\vspace{4mm}
+\noindent Variation: $\sum^n_{i=1} (Y_i - \bar{Y})^2 = \sum^n_{i=1} (Y_i - \hat{Y_i})^2 + \sum^n_{i=1} (\hat{Y_i} - \bar{Y})^2$.
+
+\noindent $\rightarrow~SST = SSE(RSS) + SSR(SSreg)$.
+
+\vspace{4mm}
+\noindent Simple notations:
+
+\noindent $SST = \sum^n_{i=1} (y_i - \bar{y})^2 = Syy$.
+
+\noindent $SSR = \hat{\beta_1} Sxy$.
+
+\noindent $SSE = \sum^n_{i=1} \hat{e_i}^2 =  Syy - \hat{\beta_1} Sxy$.
+
+\vspace{4mm}
+\noindent ANOVA table:
+\begin{tabular}{c|c|c|c|c|c}
+Source of & Degree of & Sum of & Mean & $F$ & $p$-value \\
+Variation & Freedom & Squares & Squares & & \\
+\hline Regression & 1 & SSR & MSR & $\frac{MSR}{MSE} = \frac{SSR/1}{SSE/(n-2)}$ & $P(F < F_{df_1,~df_2})$ \\
+Residual & $n-2$ & SSE & MSE & & \\
+Total & $n-1$ & SST & & & \\
+\end{tabular}
