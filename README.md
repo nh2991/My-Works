@@ -1,6 +1,6 @@
 # My PortFolio
 
-![This is an image](https://www.notion.so/c840b3b04c69408d90a56f4c18bc519c#87db027d0df049b79d7eba0b49ca9a60)
+![KakaoTalk_Photo_2023-01-29-17-54-40](https://user-images.githubusercontent.com/123232681/215372135-8bb0bdc4-b332-403c-a63f-ee477a556daf.png)
 
 ---
 
