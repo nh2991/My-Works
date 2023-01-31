@@ -31,7 +31,7 @@
 | 미시경제학 | 20-여름 | 김용선 | 수리통계학(1) | 20-2 | 박태영 |
 | 후생경제학 | 20-2 | 김세민 | R과파이썬프로그래밍 | 22-2 | 한솔지 |
 | 국제무역론 | 22-2 | 신동천 | 수리통계학(2) | 22-2 | 김일문 |
-| Money and Banking | 23-1 | P, D. Convery | Introduction to Data Analysis and Regression | 23-1 | Maria, Cha |
+| Money and Banking | 23-1 | P, D. Convery | Introduction to \n Data Analysis \n and Regression | 23-1 | Maria, Cha |
 | International Finance | 23-1 | O. Itskhoki | 
 
 
