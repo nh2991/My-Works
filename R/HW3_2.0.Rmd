@@ -1,0 +1,202 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Homework 3}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-01-31"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+## 1. 
+### (a).
+
+\noindent Based on the output for model (3.7) a business analyst concluded the following:
+
+\noindent \emph{The regression coefficient of the predictor variable, Distance is highly statistically significant and the model explains 99.4\% of the variability in the $Y$-variable, Fare. Thus model (1) is a highly effective model for both understanding the effects of Distance on Fare and for predicting future values of Fare given the value of the predictor variable, Distance.}
+
+```{r}
+airfare <- read.table("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Homework/airfares.txt", header=T)
+
+attach(airfare)
+
+lm_data_hw3_1 <- lm(Fare~Distance)
+summary(lm_data_hw3_1)
+
+par(mfrow=c(1,2))
+plot(Distance, Fare)
+abline(lm_data_hw3_1, col='red', lty='dashed')
+
+st_residuals_hw3_1 <- rstandard(lm_data_hw3_1)
+plot(Distance, sqrt((st_residuals_hw3_1)^2))
+abline(lsfit(Distance, sqrt((st_residuals_hw3_1)^2)), col='red', lty='dashed')
+
+
+```
+
+```{r}
+
+par(mfrow=c(2,2))
+plot(lm_data_hw3_1)
+abline(-2,0, col='red', lty='dashed')
+abline(2,0, col='red', lty='dashed')
+abline(v=4/(length(airfare$City)), col='blue', lty='dashed')
+
+```
+
+\noindent The model is pretty nice, but they have two bad leverage points, whose also having big Cook's distance, too.
+
+### (b)
+
+\noindent First, we can transform to $\sqrt{y} = \beta_0 + \beta_1 \sqrt{x} + \varepsilon$.
+```{r}
+
+sqrtDistance_hw3_1 <- sqrt(airfare$Distance)
+sqrtFare_hw3_1 <- sqrt(airfare$Fare)
+
+lm_data_sqrt_hw3_1 <- lm(sqrtFare_hw3_1~sqrtDistance_hw3_1)
+summary(lm_data_sqrt_hw3_1)
+
+par(mfrow=c(2,2))
+plot(lm_data_sqrt_hw3_1)
+abline(-2,0, col='red', lty='dashed')
+abline(2,0, col='red', lty='dashed')
+abline(v=4/(length(airfare$City)), col='blue', lty='dashed')
+
+```
+
+\noindent Or, we can also use $\log y = \beta_0 + \beta_1 \log x + \varepsilon$.
+
+```{r}
+
+logDistance_hw3_1 <- log(airfare$Distance)
+logFare_hw3_1 <- log(airfare$Fare)
+
+lm_data_log_hw3_1 <- lm(logFare_hw3_1~logDistance_hw3_1)
+summary(lm_data_log_hw3_1)
+
+par(mfrow=c(2,2))
+plot(lm_data_log_hw3_1)
+abline(-2,0, col='red', lty='dashed')
+abline(2,0, col='red', lty='dashed')
+abline(v=4/(length(airfare$City)), col='blue', lty='dashed')
+
+```
+
+```{r car}
+
+library(car)
+
+par(mfrow=c(1,1))
+inverseResponsePlot(lm_data_hw3_1, key=TRUE)
+
+```
+\noindent The inverse response plot shows that $\lambda=1.02$ would produce best result.
+
+```{r}
+
+improveDistance_hw3_1 <- (airfare$Distance)^(1.02)
+improveFare_hw3_1 <- (airfare$Fare)^(1.02)
+
+lm_data_improve_hw3_1 <- lm(improveFare_hw3_1~improveDistance_hw3_1)
+summary(lm_data_improve_hw3_1)
+
+par(mfrow=c(2,2))
+plot(lm_data_improve_hw3_1)
+abline(-2,0, col='red', lty='dashed')
+abline(2,0, col='red', lty='dashed')
+abline(v=4/(length(airfare$City)), col='blue', lty='dashed')
+
+```
+
+## 2.
+
+\noindent An analyst for the auto industry has asked for your help in modeling data on the prices of new cars. Interest centers on modeling suggested retail price as a function of the cost to the dealer for 234 new cars. The data set, which is available on the book website in the file cars04.csv, is a subset of the data from http://www.amstat.org/publications/jse/datasets/04cars.txt
+
+\noindent The first model to fit to the data was  
+Suggested Retail Price = $\beta_0 + \beta_1 * \text{Dealer Cost} + e$.
+
+### (a)
+\noindent Based on the output for model, the analyst concluded the following:
+
+\noindent \emph{Since the model explains just more than 99.8\% of the variabilty in Suggested Retail Price and the coefficient of Dealer Cost has a $t$-value greater than 412, model (1) is a highly effective model for producting prediction intervals for Suggested Retail Price}.
+
+\noindent Provide a detailed critique of this conclusion.
+
+```{r}
+
+cars <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Homework/cars04.csv", header=T)
+
+attach(cars)
+
+lm_data_hw3_2 <- lm(SuggestedRetailPrice~DealerCost)
+summary(lm_data_hw3_2)
+
+par(mfrow=c(1,2))
+plot(DealerCost, SuggestedRetailPrice)
+abline(lm_data_hw3_2, col='red', lty='dashed')
+
+st_residuals_hw3_2 <- rstandard(lm_data_hw3_2)
+plot(DealerCost, sqrt((st_residuals_hw3_2)^2))
+abline(lsfit(DealerCost, sqrt((st_residuals_hw3_2)^2)), col='red', lty='dashed')
+
+par(mfrow=c(2,2))
+plot(lm_data_hw3_2)
+abline(-2,0, col='red', lty='dashed')
+abline(2,0, col='red', lty='dashed')
+abline(v=4/(length(cars$SuggestedRetailPrice)), col='blue', lty='dashed')
+
+```
+
+
+### (b)
+Carefully describe all the shortcomings evident in model (3.10). For each shortcoming, describe the steps needed to overcome the shortcoming. 
+
+\noindent (1) The square root of absolute value of standardized residuals has a steep slope.  
+(2) QQ-plot have heavy-tail.
+
+\noindent The second model fitted to the data was  
+$\log (\text{Suggested Retail Price}) = \beta_0 + \beta_1 \log (\text{Dealer Cost}) + e$.  
+
+```{r}
+
+logDealerCost_hw3_2 <- log(cars$DealerCost)
+logSuggestedRetailPrice_hw3_2 <- log(cars$SuggestedRetailPrice)
+
+lm_data_log_hw3_2 <- lm(logSuggestedRetailPrice_hw3_2~logDealerCost_hw3_2)
+summary(lm_data_log_hw3_2)
+
+par(mfrow=c(2,2))
+plot(lm_data_log_hw3_2)
+abline(-2,0, col='red', lty='dashed')
+abline(2,0, col='red', lty='dashed')
+abline(v=4/(length(airfare$City)), col='blue', lty='dashed')
+
+```
+
+### (c)
+
+\noindent (3.11) is an improvement of (3.10). This is because  
+(1) The square root of absolute value of standardized residuals have flatter regression.  
+(2) the gap of fitted values are much more smaller, and the leverage, too.
+
+### (d)
+
+\noindent This is the percentage change of Suggested Retail Price, when the Dealer Cost fluctuates.
+
+### (e)
+
+\noindent (1) It still have points such that $|\gamma_i| > 2$, not having the constant variances.
+
+## 3.
+
+\noindent Chu (1996) discusses the development of a regression model to predict the price of diamond rings from the size of their diamond stones (in terms of their weight in carats). Data on both variables were obtained from a full page advertisement placed in the \emph{Straits Times} newspaper by a Singapore-based retailer of diamond jewelry. Only rings made with 20 carat gold and mounted with a single diamond stone were included in the data set. There were 48 such rings of varying designs. (Information on the designs was available but not used in the modeling.)
+
+### Part 1 - (a)
