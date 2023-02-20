@@ -1,0 +1,70 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Final Project Ver 1.0}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-02-17"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+```{r}
+
+crypto <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Final Project/first.csv")
+
+colnames(crypto) <- c('Bitcoin', 'Ethereum', 'Tether', 'BNB', 'USD.Coin', 'XRP', 'Binance.USD', 'Cardano', 'Polygon', 'Dogecoin')
+
+head(crypto)
+
+crypto_lm <- lm(Bitcoin~Ethereum+Tether+BNB+XRP+Cardano+Dogecoin, data=crypto)
+
+summary(crypto_lm)
+
+```
+
+```{r}
+
+anova(crypto_lm)
+
+```
+
+
+```{r}
+
+crypto_improve_lm <- lm(Bitcoin~Ethereum+BNB+XRP+Cardano, data=crypto)
+
+summary(crypto_improve_lm)
+
+```
+
+
+```{r}
+
+anova(crypto_improve_lm)
+
+```
+
+```{r}
+
+anova(crypto_improve_lm, crypto_lm)
+
+```
+
+\noindent Thus, we can't reject the null, so that we had better use the reduced model.
+
+```{r}
+
+plot(crypto$Bitcoin, type='l', col='blue')
+plot(crypto$Ethereum, type='l', col='red')
+plot(crypto$BNB, type='l', col='green')
+plot(crypto$XRP, type='l', col='orange')
+plot(crypto$Cardano, type='l', col='purple')
+
+```
