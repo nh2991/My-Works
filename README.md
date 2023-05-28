@@ -32,6 +32,7 @@
 | R과파이썬프로그래밍 | 22-2 | 한솔지 |
 | 수리통계학(2) | 22-2 | 김일문 |
 | Introduction to Data Analysis and Regression | 23-1 | Maria, Cha |
+| Statistical Models in Finance | 23-1 | N, Christou |
 
 ## 경제학 수강 과목
 
@@ -46,6 +47,8 @@
 | 국제무역론 | 22-2 | 신동천 |
 | Money and Banking | 23-1 | P, D. Convery |
 | International Finance | 23-1 | O. Itskhoki |
+| Introduction to Econometrics | 23-1 | R, A. Pinto |
+| Behavioral Economics | 23-1 | Lu, Jay Yin Jie |
 
 
 
