@@ -1,0 +1,131 @@
+---
+title: "Project 4"
+author: "Juwon Lee"
+date: "2023-04-24"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Project 4}
+author: "Juwon Lee, Economics and Statistics, Yonsei University"
+date: "2023-04-24"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+### Project 4.
+
+#### 1.
+
+```{r}
+hw4 <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Statistical Models in Finance/stockData2.csv",sep=',', header=T)
+
+r_hw4 <- (hw4[-1, 3:ncol(hw4)]-hw4[-nrow(hw4),3:ncol(hw4)])/hw4[-nrow(hw4),3:ncol(hw4)]
+
+lm1_hw4 <- lm(r_hw4$X.GSPC~r_hw4$AAPL, data=r_hw4)
+
+summary(lm1_hw4)
+
+var(lm1_hw4$residuals)
+
+lm1_hw4$coefficients[1]
+
+```
+
+length(colnames(r_hw4))
+
+```{r}
+
+alpha_hw4 <- vector()
+beta_hw4 <- vector()
+varepsilon_hw4 <- vector()
+
+i <- 1
+
+GSPC <- as.vector(r_hw4$X.GSPC)
+
+for (i in 2:30) {
+  
+    stock_hw4 <- as.vector(as.matrix(r_hw4)[,i])
+    lm1_hw4 <- lm(GSPC~stock_hw4)
+    alpha_hw4[i-1] <- lm1_hw4$coefficients[1]
+    beta_hw4[i-1] <- lm1_hw4$coefficients[2]
+    varepsilon_hw4[i-1] <- var(lm1_hw4$residuals)
+    
+}
+
+alpha_hw4
+beta_hw4
+varepsilon_hw4
+
+```
+\noindent Note that Alibaba didn't have sufficient data, so that I collected only 29 stocks.
+
+\newpage
+
+\noindent \textbf{2.}
+
+```{r}
+
+covmat_hw4 <- cov(r_hw4[-1])
+
+covmat_hw4
+
+```
+
+\newpage
+
+\noindent \textbf{3.}
+
+```{r}
+
+means_hw4 <- colMeans(r_hw4[-1])
+corrmat_hw4 <- cor(r_hw4[-1])
+variances_hw4 <- diag(covmat_hw4)
+stdev_hw4 <- diag(covmat_hw4)^(0.5)
+
+B2_hw4 <- t(means_hw4) %*% covmat_hw4^(-1) %*% means_hw4
+
+A_hw4 <- sum(covmat_hw4^(-1) * means_hw4)
+B_hw4 <- sum(covmat_hw4^(-1) * means_hw4 * means_hw4)
+C_hw4 <- sum(covmat_hw4^(-1))
+D_hw4 <- B_hw4 * C_hw4 - A_hw4 * A_hw4
+
+x_hw4 <- seq(-0.5, 0.5, 0.001)
+sigma_squared_hw4 <- (C_hw4 * x_hw4 * x_hw4 - 2 * A_hw4 * x_hw4 + B_hw4) / D_hw4
+
+hw2 <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Statistical Models in Finance/stockData.csv",sep=',', header=T)
+
+r_hw2 <- (hw2[-1, 3:ncol(hw2)]-hw2[-nrow(hw2),3:ncol(hw2)])/hw2[-nrow(hw2),3:ncol(hw2)]
+means_hw2 <- colMeans(r_hw2[-1])
+covmat_hw2 <- cov(r_hw2[-1])
+corrmat_hw2 <- cor(r_hw2[-1])
+variances_hw2 <- diag(covmat_hw2)
+stdev_hw2 <- diag(covmat_hw2)^(0.5)
+
+A_hw2 <- sum(covmat_hw2^(-1) * means_hw2)
+B_hw2 <- sum(covmat_hw2^(-1) * means_hw2 * means_hw2)
+C_hw2 <- sum(covmat_hw2^(-1))
+D_hw2 <- B_hw2 * C_hw2 - A_hw2 * A_hw2
+
+B2_hw2 <- t(means_hw2) %*% covmat_hw2^(-1) %*% means_hw2
+
+sigma_squared_hw2 <- (C_hw2 * x_hw4 * x_hw4 - 2 * A_hw2 * x_hw4 + B_hw2) / D_hw2
+
+
+
+sigma_squared_hw4_2 <- (C_hw4 * x_hw4 * x_hw4 - 2 * A_hw4 * x_hw4 + B2_hw4) / D_hw4
+sigma_squared_hw2_2 <-  (C_hw2 * x_hw4 * x_hw4 - 2 * A_hw2 * x_hw4 + B2_hw2) / D_hw2
+
+par(mfrow=c(1,2))
+plot(sigma_squared_hw4, x_hw4, type='l', main='2014/01/01-19/01/01')
+plot(sigma_squared_hw2, x_hw4, type='l', main='2015/01/01-20/01/01')
+
+
+```
+

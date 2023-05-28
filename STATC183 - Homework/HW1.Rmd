@@ -1,0 +1,91 @@
+---
+title: "HW1"
+author: "Juwon Lee"
+date: "2023-04-09"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Homework 1}
+author: "Juwon Lee, Economics and Statistics, Yonsei University"
+date: "2023-04-08"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+### Project 1.
+
+#### a, b.
+
+```{r}
+
+hw1 <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Statistical Models in Finance/stockData.csv",
+                sep=',', header=T)
+
+```
+
+##### c.
+
+```{r}
+
+r_hw1 <- (hw1[-1, 3:ncol(hw1)]-hw1[-nrow(hw1),3:ncol(hw1)])/hw1[-nrow(hw1),3:ncol(hw1)]
+
+means_hw1 <- colMeans(r_hw1[-1])
+
+covmat_hw1 <- cov(r_hw1[-1])
+
+corrmat_hw1 <- cor(r_hw1[-1])
+
+variances_hw1 <- diag(covmat_hw1)
+
+stdev_hw1 <- diag(covmat_hw1)^(0.5)
+
+```
+
+#### d.
+
+```{r}
+
+plot(stdev_hw1, means_hw1)
+
+```
+
+#### e.
+
+```{r}
+
+equal_means <- mean(means_hw1)
+
+equal_stdev <- (1/(length(r_hw1)-1)*mean(stdev_hw1)^2 + (length(r_hw1)-1)/length(r_hw1)*mean(covmat_hw1))^(1/2)
+
+plot(stdev_hw1, means_hw1)
+points(equal_stdev, equal_means, col='red')
+
+```
+
+#### f.
+
+```{r}
+
+A_hw1 <- sum(covmat_hw1^(-1) * means_hw1)
+
+B_hw1 <- sum(covmat_hw1^(-1) * means_hw1 * means_hw1)
+
+C_hw1 <- sum(covmat_hw1^(-1))
+
+D_hw1 <- B_hw1 * C_hw1 - A_hw1 * A_hw1
+
+y1_hw1 <- seq(-1, 1, 0.001)
+
+x1_hw1 <- ((C_hw1 * y1_hw1^2 - 2 * A_hw1 * y1_hw1 + B_hw1) / D_hw1)^(1/2)
+
+plot(stdev_hw1, means_hw1)
+points(equal_stdev, equal_means, col='red')
+lines(x1_hw1, y1_hw1, col='red')
+
+```
