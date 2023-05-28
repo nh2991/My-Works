@@ -1,0 +1,97 @@
+---
+title: "HW1"
+output: pdf_document
+date: "2023-01-13"
+output:
+  pdf_document:
+    latex_engine: xelatex
+---
+
+'''{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+'''
+
+'''{r}
+install.packages("ggplot2")
+library(ggplot2)
+'''
+
+***** 
+
+'''{r}
+heart <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Heart.csv")
+
+head(heart)
+
+heart1 <- heart[c(6,9)]
+heart1
+'''
+
+*****
+
+'''{r, echo=FALSE}
+plot(heart1)
+'''
+
+'''{r}
+sum1 <- heart1[1] * heart1[2]
+
+sum1
+
+as.numeric(dim(heart1)[1])
+
+as.numeric(lapply(heart1[1], mean))
+as.numeric(lapply(heart1[2], mean))
+'''
+
+*****
+
+'''{r}
+Sxy <- as.numeric(lapply(sum1, sum)) - as.numeric(dim(heart1)[1]) * as.numeric(lapply(heart1[1], mean)) * as.numeric(lapply(heart1[2], mean))
+
+Sxy
+
+sum2 <- heart1[1]^2
+
+sum2
+
+Sxx <- as.numeric(lapply(sum2, sum)) - as.numeric(dim(heart1)[1]) * as.numeric(lapply(heart1[1], mean))^2
+
+Sxx
+
+beta0 <- as.numeric(lapply(heart1[2], mean)) - Sxy / Sxx * as.numeric(lapply(heart1[1], mean))
+
+beta0
+
+beta1 <- Sxy / Sxx
+
+beta1
+'''
+
+'''{r, echo=FALSE}
+abline(beta0, beta1, col="red")
+'''
+
+'''{r}
+sum3 <- heart1[2]^2
+
+sum3
+
+Syy <- as.numeric(lapply(sum3, sum)) - as.numeric(dim(heart1)[2]) * as.numeric(lapply(heart1[2], mean))^2
+
+Syy
+
+R <- beta1 * Sxy / Syy
+
+R
+
+MaxHR <- as.vector(heart1[2])
+Chol <- as.vector(heart1[1])
+
+data_lm <- lm(MaxHR~Chol, data=heart1)
+data_lm
+
+summary(data_lm)
+'''
+
+# The R-squared in summary is 1.178e-05, which is also too small to assess.

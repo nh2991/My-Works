@@ -1,0 +1,362 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Homework 5}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-02-23"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+## 1.
+
+\noindent The analyst was so impressed with your answers to Exercise 5 in Section 3.4 that your advice has been sought regarding the next stage in the data-anlysis, namely and analysis of the effects of different aspects of a car on its suggested retail price. Data are available for all 234 cars on the following variables:  
+$Y$ = Suggested Retail Price, $x_1$ = Engine size, $x_2$ = Cylinders,  
+$x_3$ = Horse power, $x_4$= Highway mpg, $x_5$ = Weight, $x_6$ = Wheel Base, $x_7$ = Hyprid.
+
+\noindent The model is  
+$Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 + \beta_5 x_5 + \beta_6 x_6 + \beta_7 x_7 + e$.
+
+### (a) Decide is it a valid model. Give reasons to support your answer.
+
+```{r}
+
+car <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/cars04.csv")
+
+lm_hw5_1 <- lm(SuggestedRetailPrice~EngineSize+Cylinders+Horsepower+HighwayMPG+Weight+WheelBase+Hybrid, data=car)
+
+summary(lm_hw5_1)
+
+```
+
+\noindent It is valid model, because $adj-R^2 = 0.7751$, very well.
+
+### (b) The plot of residuals against fitted values produces a curved pattern. Describe what, if anything can be learned about model from this plot.
+
+```{r}
+
+library(car)
+
+par(mfrow=c(2,2))
+plot(lm_hw5_1)
+
+par(mfrow=c(2,4))
+plot(car$EngineSize, rstandard(lm_hw5_1))
+plot(car$Cylinders, rstandard(lm_hw5_1))
+plot(car$Horsepower, rstandard(lm_hw5_1))
+plot(car$HighwayMPG, rstandard(lm_hw5_1))
+plot(car$Weight, rstandard(lm_hw5_1))
+plot(car$WheelBase, rstandard(lm_hw5_1))
+plot(car$Hybrid, rstandard(lm_hw5_1))
+
+par(mfrow=c(2,4))
+avPlot(lm_hw5_1, variable='EngineSize', ask=FALSE)
+avPlot(lm_hw5_1, variable='Cylinders', ask=FALSE)
+avPlot(lm_hw5_1, variable='Horsepower', ask=FALSE)
+avPlot(lm_hw5_1, variable='HighwayMPG', ask=FALSE)
+avPlot(lm_hw5_1, variable='Weight', ask=FALSE)
+avPlot(lm_hw5_1, variable='WheelBase', ask=FALSE)
+avPlot(lm_hw5_1, variable='Hybrid', ask=FALSE)
+
+```
+
+\noindent Thus, the data having small, or large fitted values have larger residuals.
+
+### (c) Identify any bad leverage points for model.
+
+\noindent Bad leverage points $\rightarrow \begin{cases} h_{ii} >\frac{4}{n} \\ |\gamma_i| > 2 \end{cases}$
+
+```{r}
+
+car[hatvalues(lm_hw5_1) > 2 * (7+1)/length(car) & abs(rstandard(lm_hw5_1)) > 2]
+
+```
+
+\noindent Thus, there doesn't exist any bad leverage points.
+
+```{r}
+
+par(mfrow=c(2,2))
+plot(lm_hw5_1)
+abline(-2, 0, col='red', lty='dashed')
+abline(2, 0, col='red', lty='dashed')
+abline(v=2 * (7+1)/length(car), col='blue', lty='dashed')
+
+
+```
+
+\noindent The multivariate version of the Box-Cox method was used to transform the predictors, while a $\log$ transformation was used for the response variable to improve interpretability. This resulted in the following model:  
+$\log (Y) = \beta_0 + \beta_1 x_1^{0.25} + \beta_2 \log (x_2) + \beta_3 \log (x_3) + \beta_4 ( \frac{1}{x_4}) + \beta_5 x_5 + \beta_6 \log (x_6) + \beta_7 x_7 + e$.
+
+### (d) Decide whether this is a valid model.
+
+```{r}
+
+car[5] <- car[5]^(1/4)
+
+car[9] <- car[9]^(-1)
+
+head(car)
+
+lm_hw5_2 <- lm(SuggestedRetailPrice~EngineSize+Cylinders+Horsepower+HighwayMPG+Weight+WheelBase+Hybrid, data=car)
+
+summary(lm_hw5_2)
+
+```
+
+\noindent It is a valid model, having $adj-R^2 = 0.7882$.
+
+### (e) To obtain a final model, the analyst wants to simply remove the two insignificant predictors $(1/x_4)$ and $\log (x_6)$. Perform a partial F-test to see if this is a sensible strategy.
+
+```{r}
+
+lm_hw5_3 <- lm(SuggestedRetailPrice~EngineSize+Cylinders+Horsepower+Weight+Hybrid, data=car)
+
+summary(lm_hw5_3)
+
+anova(lm_hw5_3, lm_hw5_2)
+
+```
+
+\noindent Then $p$-value = 0.1929 > 0.05, so that we cannot reject the null.  
+Thus, we cannot say that using a full model is better.
+
+### (f) The analyst's boss has complained about the model saying that it fails to take account of the manufacturer of the vehicle (e.g. BMW vs Toyota). Describe how model could be expanded in order to estimate the effect of manufacturer on suggested retail price.
+
+```{r}
+
+library(tidyverse)
+
+par(mfrow=c(1,2))
+
+ggplot(data=car) +
+  geom_point(mapping=aes(x=log(lm_hw5_3$fitted.values), y=log(car$SuggestedRetailPrice), color=car$Vehicle.Name), show.legend = FALSE)
+
+ggplot(data=car) +
+  geom_point(mapping=aes(x=car$Vehicle.Name, y=log(car$SuggestedRetailPrice), color=car$Vehicle.Name), show.legend = FALSE)
+
+```
+
+
+## 2.
+
+\noindent An avid fan of the PGA tour with limited background in statistics has sought your help in answering one of the age-old questions in golf, namely, \emph{what is the relative importance of each different aspect of the game on average prize money in professional golf?}
+
+\noindent $Y$ (Prize Money) = Average prize money per tournament.  
+$x_1$ (Driving Accuracy) = The percent of time a player is able to hit the fairway with his tee shot.  
+$x_2$ (GIR) = Greens in Regulation is the percent of time a player was able to hit the green in regulation.  
+$x_3$ (Putting Average) = Putting performance on those holes where the green is hit in regulation (GIR).  
+$x_4$ (Birdie Conversion) = The percent of time a player makes birdie or better after hitting the green in regulation.  
+$x_5$ (SandSaves) = The percent of time a player was able to get "up and down" once in a greenside sand bunker.  
+$x_6$ (Scrambling) = The percent of time that a player misses the green in regulation, but sill makes par or better.  
+$x_7$ (PuttsPerRound) = The average total number of putts per round.
+
+### (a) A statistician from Australia has recommended to the analyst that they not transform any of the predictor variables but that they transform $Y$ using the $\log$ transformation. Do you agree with this recommendation? Give reasons to support your answer.
+
+```{r}
+
+golf <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/pgatour2006.csv")
+
+```
+
+```{r}
+
+lm_hw5_2_1 <- lm(PrizeMoney~DrivingAccuracy+GIR+PuttingAverage+BirdieConversion+SandSaves+Scrambling+PuttsPerRound, data=golf)
+
+summary(lm_hw5_2_1)
+
+library(MASS)
+
+power_hw5_2_1 <- powerTransform(cbind(golf$DrivingAccuracy, golf$GIR, golf$PuttingAverage, golf$BirdieConversion, golf$SandSaves, golf$Scrambling, golf$PuttsPerRound)~1)
+
+summary(power_hw5_2_1)
+
+library(car)
+
+inverseResponsePlot(lm_hw5_2_1)
+
+```
+
+\noindent Thus, only transforming $Y$ is a reasonable way.
+
+### (b) Develop a valid full regression model containing all seven potential predictor variables listed above. Ensure that you provide justification for your choice of full model, which includes scatter plots of the data, plots plots of standardized residuals, and any other relevant diagnostic plots.
+
+```{r}
+
+lm_hw5_2_2 <- lm((PrizeMoney)^(0.12)~DrivingAccuracy+GIR+PuttingAverage+BirdieConversion+SandSaves+Scrambling+PuttsPerRound, data=golf)
+
+summary(lm_hw5_2_2)
+
+par(mfrow=c(2,2))
+plot(lm_hw5_2_2)
+abline(-2, 0, col='red', lty='dashed')
+abline(2, 0, col='red', lty='dashed')
+abline(v=2 * (7+1)/length(golf), col='blue', lty='dashed')
+
+```
+
+```{r}
+
+lm_hw5_3 <- lm((PrizeMoney)^(0.12)~GIR+BirdieConversion, data=golf)
+summary(lm_hw5_3)
+
+par(mfrow=c(2,2))
+plot(lm_hw5_3)
+abline(2,0,col='red',lty='dashed')
+abline(-2,0,col='red',lty='dashed')
+abline(v=2*(4+1)/(length(golf$GIR)),col='blue',lty='dashed')
+
+library(car)
+
+par(mfrow=c(1,2))
+avPlot(lm_hw5_3, variable='GIR', ask=FALSE)
+avPlot(lm_hw5_3, variable='BirdieConversion', ask=FALSE)
+
+```
+
+### (c) Identify any points that should be investigated. Give one or more reasons to support each point chosen.
+
+\noindent The point 40, 63, 185 should be investigated, because  
+(i) They have tail-parts on QQ-plot.  
+(ii) They are outliers for all of Added-Variable Plots.
+
+### (d) Describe any weaknesses in your model.
+
+\noindent (i) Only two variables can reject the null on $t$-test.  
+(ii) For added-variable plot, three variables doesn't explain $Y$.  
+
+```{r}
+
+summary(lm_hw5_3)$adj.r.squared
+
+extractAIC(lm_hw5_3)[2]
+
+extractAIC(lm_hw5_3)[2] + 2 * 2 * (2+2) * (2+3) / (length(golf$GIR)-2-1)
+
+extractAIC(lm_hw5_3, k=log(length(golf$GIR)))[2]
+
+```
+
+
+### (e) The golf fan wants to remove all predictors with insignificant $t$-values from the full model in a single step. Explain why you would not recommend this approach.
+
+```{r}
+
+lm_hw5_4 <- lm(PrizeMoney~DrivingAccuracy+GIR+BirdieConversion+Scrambling, data=golf)
+
+summary(lm_hw5_4)
+
+par(mfrow=c(2,2))
+plot(lm_hw5_4)
+
+library(car)
+
+par(mfrow=c(2,2))
+avPlot(lm_hw5_4, variable='GIR', ask=FALSE)
+avPlot(lm_hw5_4, variable='BirdieConversion', ask=FALSE)
+avPlot(lm_hw5_4, variable='Scrambling', ask=FALSE)
+
+summary(lm_hw5_4)$adj.r.squared
+
+extractAIC(lm_hw5_4)[2]
+
+extractAIC(lm_hw5_4)[2] + 2 * 3 * (3+2) * (3+3) / (length(golf$GIR)-3-1)
+
+extractAIC(lm_hw5_4, k=log(length(golf$GIR)))[2]
+
+```
+
+\noindent Adjusted $R^2$, AIC, AICc, BIC are poorer than the final model.  
+It has significant outlier, which is 178, too.
+
+
+## 3.
+
+\noindent The real data set in this question first appeared in Hald (1952). The data are given in Table 7.5 and can be found on the book web site in the file Haldcement.txt. Interest centers on using variable selection to choose a subset of the predictors to model $Y$. Throughout this question we shall assume that the full model below is a valid model for the data  
+$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_3 + \beta_4 X_4 + e$.
+
+
+```{r}
+
+cement <- read.table("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Haldcement.txt", header=T)
+
+lm_hw5_5 <- lm(Y~x1+x2+x3+x4, data=cement)
+summary(lm_hw5_5)
+
+summary(lm_hw5_5)$adj.r.squared
+
+extractAIC(lm_hw5_5)[2]
+
+extractAIC(lm_hw5_5)[2] + 2 * 4 * (4+2) * (4+3) / (length(golf$GIR)-4-1)
+
+extractAIC(lm_hw5_5, k=log(length(golf$GIR)))[2]
+
+```
+
+### (a) Identify the optimal model or models on $R^2_{adj},~AIC,~AICc,~BIC$ from the approach based on all possible subsets.
+
+```{r}
+
+library(leaps)
+
+xvalues <- cbind(cement$x1, cement$x2, cement$x3, cement$x4)
+
+considerallsusbset <- regsubsets(as.matrix(xvalues), cement$Y)
+summary(considerallsusbset)
+
+lm_hw5_6_1 <- lm(Y~x4, data=cement)
+summary(lm_hw5_6_1)$adj.r.squared
+
+lm_hw5_6_2 <- lm(Y~x1+x2, data=cement)
+summary(lm_hw5_6_2)$adj.r.squared
+
+lm_hw5_6_3 <- lm(Y~x1+x2+x3+x4, data=cement)
+summary(lm_hw5_6_3)$adj.r.squared
+
+lm_hw5_6_4 <- lm(Y~x1+x2+x3+x4, data=cement)
+summary(lm_hw5_6_4)$adj.r.squared
+
+```
+
+\noindent Thus, it may be the optimal model that $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2$.
+
+### (b) Identify the optimal model or models based on AIC and BIC from the approach based on forward selection.
+
+```{r}
+
+lm_hw5_6 <- lm(Y~1, data=cement)
+forwardAIC <- step(lm_hw5_6, scope=list(lower=~1, upper=~x1+x2+x3+x4), direction='forward', data=cement)
+
+```
+
+\noindent Thus, it is an optimal model that $y = \beta_0 + \beta_4 x_4 + \beta_1 x_1 + \beta_2 x_2$.
+
+### (c) Identify the optimal model or models based on AIC and BIC from the approach based on backward elimination.
+
+```{r}
+
+lm_hw5_6 <- lm(Y~x1+x2+x3+x4, data=cement)
+backAIC <- step(lm_hw5_6, direction='backward', data=cement)
+
+```
+
+\noindent Thus, $y = \beta_0 + \beta_4 x_4 + \beta_1 x_1 + \beta_2 x_2$.
+
+### (d) Carefully explain why the models chosen in (a), (b) & (c) are not all the same.
+
+\noindent I think that (a) considers all of the results,  
+but (b) and (c) have steps, so that the $x_4$ cannot be eliminated, because  
+(b) $x_4$ contains at first, then we consider given $x_4$.  
+(c) $x_4$ contains, because just eliminating $x_3$ makes well model.
+
+### (e) Recommend a final model. Give detailed reasons to support your choice.
+
+\noindent I think that $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_4 x_4$ is optimal. This is because $x_4$ does not increase AIC much, but two methods pick $x_4$.
+

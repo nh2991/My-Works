@@ -1,0 +1,114 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Homework 1}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-01-13"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## 1. Review on simple linear regression.
+
+\noindent (1) B. They have moderate negative linear relationship.
+
+\noindent (2) 
+$$\text{Correlation Coefficient}~r = \sqrt{R^2} = \sqrt{0.4117} \approx 0.64164$$
+
+\noindent (3) This is
+$$ \hat{\beta_1} = r * \frac{s_Y}{s_X} = 0.64164 * \frac{5}{10.84} \approx 0.29596$$
+$$ \hat{\beta_0} = \bar{Y} - \hat{\beta_1} * \bar{X}  = 20.16 - \hat{\beta_1} * 20.97 \approx 13.95375$$
+
+\noindent It means that we can make a 'model' to estimate 
+$Y$ such that $Y = \hat{\beta_0} + \hat{\beta_1} X$.
+
+\noindent (4) C. About 41\% of the total variability in strength of deltoid muscle is explained by the model.
+
+\noindent (5) C. It does not have any apparent pattern and it implies the good fit of the model.
+
+\noindent (6) It means that $X=35$, so that
+$$ Y = \hat{\beta_0} + \hat{\beta_1} X \approx 13.95375 + 0.29596 * 35 = 24.31230 $$
+
+## 2. Review on Hypothesis testing.
+
+\noindent (1) $H_0 : \mu=5.7~~\text{vs}~~H_1: ~ \mu < 5.7$.
+
+\noindent (2) Because $n=36 > 30$, we can use $z$-statistic,
+$$ z = \frac{5.1 - 5.7}{1.4 / \sqrt{36}} \approx -2.57143$$
+\noindent (3) $P(z \leq -2.57143) \approx 0.00506$.
+
+```{r}
+pnorm((5.1 - 5.7) / (1.4 / (36)^(1/2)))
+```
+
+\noindent (4) $p$-value $\approx$ 0.00506 < 0.05, so we can ignore the null.  
+Thus, we can't say that the number of introverts are 5.7.
+
+\noindent (5) $(5.7 - z_{0.025} * \frac{1.4}{\sqrt{36}},~5.7 + z_{0.025} * \frac{1.4}{\sqrt{36}}) \approx (5.24268,~6.15733)$.
+
+\noindent (6) Thus, if the sample mean is included in this interval, then we can say that the null hypothesis can be rejected.
+\noindent Thus, because $\bar{X} = 5.1$, we can reject the null.
+
+\newpage
+
+## 3. Review on R programming
+
+First of all, we can make a dataset by the csv file.
+
+```{r}
+heart <- read.csv("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Heart.csv")
+
+heart1 <- heart[c(6,9)]
+head(heart1)
+```
+
+\noindent (1) 
+
+```{r}
+MaxHR <- as.vector(heart1[2])
+Chol <- as.vector(heart1[1])
+
+data_lm <- lm(MaxHR~Chol, data=heart1)
+data_lm
+```
+
+\newpage
+```{r lmtest}
+summary(data_lm)
+```
+
+\noindent Thus, $y = 149.981292 -0.001516x$.
+
+\noindent (2)
+
+```{r ggplot2, r heart1}
+plot(heart1)
+abline(149.981292, -0.001516, col='red')
+```
+
+\newpage
+\noindent (3) The R-squared in summary is 1.178e-05.  
+We have to use standardized residuals, so that
+
+```{r ggplot2}
+sres <- data_lm$residuals/sqrt(var(data_lm$residuals))
+plot(sres)
+```
+
+\noindent If the residual plots does not show any pattern, then the model is supposed to be a good fit. However, in this case, the residual plot is almost the same as the scatter plot, suggesting that the model provides little information. Therefore, it is a poor fit.
+
+## 4. Pre-Course Survey
+
+\noindent I have completed the Pre-Course Survey. Thank you.

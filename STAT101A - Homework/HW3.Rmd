@@ -1,0 +1,557 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Homework 3}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-01-13"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+## 1.
+
+### (a).
+Based on the output for model (3.7) a business analyst concluded the following:
+
+\noindent \emph{The regression coefficient of the predictor variable, Distance is highly statistically significant and the model explains 99.4\% of the variability in the $Y$-variable, Fare. Thus model (1) is a highly effective model for both understanding the effects of Distance on Fare and for predicting future values of Fare given the value of the predictor variable, Distance.}
+
+\noindent There are three methods to provide a detailed critique, $\begin{cases} h_{ii} > \frac{4}{n} \rightarrow~\frac{4}{17} \approx 0.235\\ |\gamma_i| > 2 \\ D_i > \frac{4}{n-2} \rightarrow~\frac{4}{15} \approx 0.267 \end{cases}$,
+
+```{r}
+airfare <- read.table("airfares.txt", header=T)
+
+lm_data_hw3_1 <- lm(airfare$Fare~airfare$Distance, data=airfare)
+
+s_hw3_1 <- (sum((lm_data_hw3_1$residuals - mean(lm_data_hw3_1$residuals))^2) / (length(airfare$Fare)-2))^(1/2)
+
+hatvalues_hw3_1 <- hatvalues(lm_data_hw3_1)
+
+st_residuals_hw3_1 <- lm_data_hw3_1$residuals / (s_hw3_1 * (1-hatvalues_hw3_1)^(1/2))
+
+cooks.distance(lm_data_hw3_1)
+
+par(mfcol=c(1,2))
+plot(airfare$Distance, airfare$Fare)
+abline(lm_data_hw3_1$coefficients[1], lm_data_hw3_1$coefficients[2], col='orange')
+
+plot(airfare$Distance, st_residuals_hw3_1)
+abline(2, 0, col='blue', lty='dashed')
+abline(-2, 0, col='blue', lty='dashed')
+
+par(mfcol=c(1,2))
+plot(airfare$Distance, hatvalues_hw3_1)
+abline(0.235, 0, col='darkgreen', lty='dashed')
+
+plot(airfare$Distance, cooks.distance(lm_data_hw3_1))
+abline(0.267, 0, col='darkgreen', lty='dashed')
+```
+
+### (b)
+\noindent Thus, two values who have more than 1500 distances are bad leverage points.  
+Also, they have big Cook's distance, too.
+
+```{r}
+airfare_improve <- airfare[c(-13,-17),]
+
+lm_data_improve_hw3_1 <- lm(airfare_improve$Fare~airfare_improve$Distance, data=airfare_improve)
+
+s_improve_hw3_1 <- (sum((lm_data_improve_hw3_1$residuals - mean(lm_data_improve_hw3_1$residuals))^2) / (length(airfare_improve$Fare)-2))^(1/2)
+
+hatvalues_improve_hw3_1 <- hatvalues(lm_data_improve_hw3_1)
+
+st_residuals_improve_hw3_1 <- lm_data_improve_hw3_1$residuals / (s_improve_hw3_1 * (1-hatvalues_improve_hw3_1)^(1/2))
+
+cooks.distance(lm_data_improve_hw3_1)
+
+par(mfcol=c(1,2))
+plot(airfare_improve$Distance, airfare_improve$Fare)
+abline(lm_data_improve_hw3_1$coefficients[1], lm_data_improve_hw3_1$coefficients[2], col='orange', lwd=5)
+abline(lm_data_hw3_1$coefficients[1], lm_data_hw3_1$coefficients[2], col='blue', lwd=2)
+
+plot(airfare_improve$Distance, st_residuals_improve_hw3_1, ylim=c(-3,3))
+abline(2, 0, col='blue', lty='dashed')
+abline(-2, 0, col='blue', lty='dashed')
+
+par(mfcol=c(1,2))
+plot(airfare_improve$Distance, hatvalues_improve_hw3_1, ylim=c(0,0.3))
+abline(0.267, 0, col='darkgreen', lty='dashed')
+
+plot(airfare_improve$Distance, cooks.distance(lm_data_improve_hw3_1))
+abline(0.308, 0, col='darkgreen', lty='dashed')
+
+```
+
+\noindent They have new ones such that $|\gamma_i| > 2$, but we had better not eliminate it because of the originality.
+
+\newpage
+
+## 2.
+
+\noindent An analyst for the auto industry has asked for your help in modeling data on the prices of new cars. Interest centers on modeling suggested retail price as a function of the cost to the dealer for 234 new cars. The data set, which is available on the book website in the file cars04.csv, is a subset of the data from http://www.amstat.org/publications/jse/datasets/04cars.txt
+
+\noindent The first model to fit to the data was  
+Suggested Retail Price = $\beta_0 + \beta_1 * \text{Dealer Cost} + e$.
+
+### (a)
+\noindent Based on the output for model, the analyst concluded the following:
+
+\noindent \emph{Since the model explains just more than 99.8\% of the variabilty in Suggested Retail Price and the coefficient of Dealer Cost has a $t$-value greater than 412, model (1) is a highly effective model for producting prediction intervals for Suggested Retail Price}.
+
+\noindent Provide a detailed critique of this conclusion.
+
+```{r}
+
+cars <- read.csv("cars04.csv", header=T)
+
+lm_data_hw3_2 <- lm(cars$SuggestedRetailPrice~cars$DealerCost, data=cars)
+
+s_hw3_2 <- (sum((lm_data_hw3_2$residuals - mean(lm_data_hw3_2$residuals))^2) / (length(cars$DealerCost)-2))^(1/2)
+
+hatvalues_hw3_2 <- hatvalues(lm_data_hw3_2)
+
+st_residuals_hw3_2 <- lm_data_hw3_2$residuals / (s_hw3_2 * (1-hatvalues_hw3_2)^(1/2))
+
+lm_data_residual_hw3_2 <- lm((((st_residuals_hw3_2)^2)^(1/2))^(1/2)~cars$DealerCost, data=cars)
+
+par(mfrow=c(1,2))
+plot(cars$DealerCost, cars$SuggestedRetailPrice)
+abline(lm_data_hw3_2$coefficients[1], lm_data_hw3_2$coefficients[2], col='red', lty='dashed')
+
+plot(cars$DealerCost, st_residuals_hw3_2)
+abline(2,0, col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+par(mfrow=c(1,2))
+plot(cars$DealerCost, (((st_residuals_hw3_2)^2)^(1/2))^(1/2))
+abline(lm_data_residual_hw3_2$coefficients[1], lm_data_residual_hw3_2$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_hw3_2)
+qqline(st_residuals_hw3_2, col='red', lty='dashed')
+```
+
+\noindent There are three methods to provide a detailed critique, $\begin{cases} h_{ii} > \frac{4}{n} \rightarrow~\frac{4}{234} \approx 0.017\\ |\gamma_i| > 2 \\ D_i > \frac{4}{n-2} \rightarrow~\frac{4}{232} \approx 0.0172 \end{cases}$,
+
+```{r}
+
+par(mfrow=c(1,3))
+plot(cars$DealerCost, st_residuals_hw3_2)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=53000, col='blue', lty='dashed')
+
+plot(cars$DealerCost, hatvalues_hw3_2)
+abline(4/234,0, col='red', lty='dashed')
+abline(v=53000, col='blue', lty='dashed')
+
+plot(cars$DealerCost, cooks.distance(lm_data_hw3_2))
+abline(4/232,0,col='red', lty='dashed')
+
+badleverage <- ((st_residuals_hw3_2)^2)^(1/2) > 2 & hatvalues_hw3_2 > 4/234
+badleverage[badleverage==TRUE]
+
+cooks.distance(lm_data_hw3_2)[cooks.distance(lm_data_hw3_2) > 4/232]
+
+```
+
+\noindent Thus, three components are bad leverage points.  
+And we can detect big Cook's distance, too.
+
+```{r}
+
+cars_improve <- cars[c(-178, -188, -189, -194, -210, -212, -213, -214, -215, -222, -223, -228, -229, -231),]
+
+lm_data_improve_hw3_2 <- lm(cars_improve$SuggestedRetailPrice~cars_improve$DealerCost, data=cars)
+
+s_improve_hw3_2 <- (sum((lm_data_improve_hw3_2$residuals - mean(lm_data_improve_hw3_2$residuals))^2) / (length(cars_improve$DealerCost)-2))^(1/2)
+
+hatvalues_improve_hw3_2 <- hatvalues(lm_data_improve_hw3_2)
+
+st_residuals_improve_hw3_2 <- lm_data_improve_hw3_2$residuals / (s_improve_hw3_2 * (1-hatvalues_improve_hw3_2)^(1/2))
+
+lm_data_residual_improve_hw3_2<-lm((((st_residuals_improve_hw3_2)^2)^(1/2))^(1/2)~cars_improve$DealerCost, data=cars_improve)
+
+par(mfrow=c(1,2))
+plot(cars_improve$DealerCost, cars_improve$SuggestedRetailPrice)
+abline(lm_data_improve_hw3_2$coefficients[1], lm_data_improve_hw3_2$coefficients[2], col='red', lty='dashed')
+
+plot(cars_improve$DealerCost, st_residuals_improve_hw3_2)
+abline(2,0, col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+par(mfrow=c(1,2))
+plot(cars_improve$DealerCost, (((st_residuals_improve_hw3_2)^2)^(1/2))^(1/2))
+abline(lm_data_residual_improve_hw3_2$coefficients[1], lm_data_residual_improve_hw3_2$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_improve_hw3_2)
+qqline(st_residuals_improve_hw3_2, col='red', lty='dashed')
+
+par(mfrow=c(1,3))
+plot(cars_improve$DealerCost, st_residuals_improve_hw3_2)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=44000, col='blue', lty='dashed')
+
+plot(cars_improve$DealerCost, hatvalues_improve_hw3_2)
+abline(4/220,0, col='red', lty='dashed')
+abline(v=44000, col='blue', lty='dashed')
+
+plot(cars_improve$DealerCost, cooks.distance(lm_data_improve_hw3_2))
+abline(4/218,0,col='red', lty='dashed')
+
+```
+
+### (b)
+Carefully describe all the shortcomings evident in model (3.10). For each shortcoming, describe the steps needed to overcome the shortcoming.  
+(1) The sqaure root of standardized residual has steep slope. $\rightarrow$ we can use $\log$-scale.  
+(2) It has a heavy-tail in QQ-plot.
+
+### (c)  
+The second model fitted to the data was  
+$\log (\text{Suggested Retail Price}) = \beta_0 + \beta_1 \log (\text{Dealer Cost}) + e$.  
+
+```{r}
+
+lm_data_log_hw3_2 <- lm(log(cars$SuggestedRetailPrice)~log(cars$DealerCost), data=cars)
+
+s_log_hw3_2 <- (sum((lm_data_log_hw3_2$residuals - mean(lm_data_log_hw3_2$residuals))^2) / (length(cars$DealerCost)-2))^(1/2)
+
+hatvalues_log_hw3_2 <- hatvalues(lm_data_log_hw3_2)
+
+st_residuals_log_hw3_2 <- lm_data_log_hw3_2$residuals / (s_log_hw3_2 * (1-hatvalues_log_hw3_2)^(1/2))
+
+lm_data_residual_log_hw3_2 <- lm((((st_residuals_log_hw3_2)^2)^(1/2))^(1/2)~log(cars$DealerCost), data=cars)
+
+par(mfrow=c(1,2))
+plot(log(cars$DealerCost), log(cars$SuggestedRetailPrice))
+abline(lm_data_log_hw3_2$coefficients[1], lm_data_log_hw3_2$coefficients[2], col='red', lty='dashed')
+
+plot(log(cars$DealerCost), st_residuals_log_hw3_2)
+abline(2,0, col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+par(mfrow=c(1,2))
+plot(log(cars$DealerCost), (((st_residuals_log_hw3_2)^2)^(1/2))^(1/2))
+abline(lm_data_residual_log_hw3_2$coefficients[1], lm_data_residual_log_hw3_2$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_log_hw3_2)
+qqline(st_residuals_log_hw3_2, col='red', lty='dashed')
+
+```
+
+\noindent Thus, the log-scale model is more fitted than above one. This is because  
+(1) The relative scale of candidates of bad leverage points decreases.  
+(2) More $\gamma_i$ are in (-2,2).  
+(3) Square root of standardized residual has flatter regression.  
+(4) Normality is better.
+
+```{r}
+
+par(mfrow=c(1,3))
+plot(log(cars$DealerCost), st_residuals_log_hw3_2)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=9.3, col='blue', lty='dashed')
+abline(v=10.9, col='blue', lty='dashed')
+
+plot(log(cars$DealerCost), hatvalues_log_hw3_2)
+abline(4/234,0, col='red', lty='dashed')
+abline(v=9.3, col='blue', lty='dashed')
+abline(v=10.9, col='blue', lty='dashed')
+
+plot(log(cars$DealerCost), cooks.distance(lm_data_log_hw3_2))
+abline(4/232,0,col='red', lty='dashed')
+
+```
+
+\noindent Thus, there are no bad leverage points,  
+and if we eliminate the values having big Cook's distances,
+
+```{r}
+cooks.distance(lm_data_log_hw3_2)[cooks.distance(lm_data_log_hw3_2) > 4/232]
+
+cars_log_improve <- cars[c(-15,-22,-23,-37,-38,-39,-40,-83,-178,-194,-214,-215,-222,-223,-228,-229),]
+
+lm_data_log_improve_hw3_2 <- lm(log(cars_log_improve$SuggestedRetailPrice)~log(cars_log_improve$DealerCost), data=cars_log_improve)
+
+s_log_improve_hw3_2 <- (sum((lm_data_log_improve_hw3_2$residuals - mean(lm_data_log_improve_hw3_2$residuals))^2) / (length(cars_log_improve$DealerCost)-2))^(1/2)
+
+hatvalues_log_improve_hw3_2 <- hatvalues(lm_data_log_improve_hw3_2)
+
+st_residuals_log_improve_hw3_2 <- lm_data_log_improve_hw3_2$residuals / (s_log_improve_hw3_2 * (1-hatvalues_log_improve_hw3_2)^(1/2))
+
+lm_data_residual_log_improve_hw3_2 <- lm((((st_residuals_log_improve_hw3_2)^2)^(1/2))^(1/2)~log(cars_log_improve$DealerCost), data=cars_log_improve)
+
+par(mfrow=c(1,2))
+plot(log(cars_log_improve$DealerCost), log(cars_log_improve$SuggestedRetailPrice))
+abline(lm_data_log_improve_hw3_2$coefficients[1], lm_data_log_improve_hw3_2$coefficients[2], col='red', lty='dashed')
+
+plot(log(cars_log_improve$DealerCost), st_residuals_log_improve_hw3_2)
+abline(2,0, col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+par(mfrow=c(1,2))
+plot(log(cars_log_improve$DealerCost), (((st_residuals_log_improve_hw3_2)^2)^(1/2))^(1/2))
+abline(lm_data_residual_log_improve_hw3_2$coefficients[1], lm_data_residual_log_improve_hw3_2$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_log_improve_hw3_2)
+qqline(st_residuals_log_improve_hw3_2, col='red', lty='dashed')
+
+par(mfrow=c(1,3))
+plot(log(cars_log_improve$DealerCost), st_residuals_log_improve_hw3_2)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=9.36, col='blue', lty='dashed')
+abline(v=10.82, col='blue', lty='dashed')
+
+plot(log(cars_log_improve$DealerCost), hatvalues_log_improve_hw3_2)
+abline(4/218,0, col='red', lty='dashed')
+abline(v=9.36, col='blue', lty='dashed')
+abline(v=10.82, col='blue', lty='dashed')
+
+plot(log(cars_log_improve$DealerCost), cooks.distance(lm_data_log_improve_hw3_2))
+abline(4/216,0,col='red', lty='dashed')
+
+```
+
+### (d)
+
+\noindent $\log$(Dealer Cost) = 1.01484, which is the amount of change of Suggested Retail Price when Dealer Cost fluctuates.
+
+### (e)
+
+\noindent 
+
+\newpage
+
+## 3.
+
+\noindent Chu (1996) discusses the development of a regression model to predict the price of diamond rings from the size of their diamond stones (in terms of their weight in carats). Data on both variables were obtained from a full page advertisement placed in the \emph{Straits Times} newspaper by a Singapore-based retailer of diamond jewelry. Only rings made with 20 carat gold and mounted with a single diamond stone were included in the data set. There were 48 such rings of varying designs. (Information on the designs was available but not used in the modeling.)
+
+### Part 1 - (a)
+
+```{r}
+
+diamonds <- read.table("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/Homework/diamonds.txt", header=T)
+
+lm_data_hw3_3 <- lm(diamonds$Price~diamonds$Size, data=diamonds)
+
+plot(diamonds$Size, diamonds$Price)
+abline(lm_data_hw3_3$coefficients[1], lm_data_hw3_3$coefficients[2], col='red', lty='dashed')
+
+###
+
+s_hw3_3 <- (sum((lm_data_hw3_3$residuals - mean(lm_data_hw3_3$residuals))^2) / (length(diamonds$Price)-2))^(1/2)
+
+hatvalues_hw3_3 <- hatvalues(lm_data_hw3_3)
+
+st_residuals_hw3_3 <- lm_data_hw3_3$residuals / (s_hw3_3 * (1-hatvalues_hw3_3)^(1/2))
+
+lm_data_residual_hw3_3 <- lm((((st_residuals_hw3_3)^2)^(1/2))^(1/2)~diamonds$Size, data=diamonds)
+
+###
+
+par(mfrow=c(1,3))
+plot(diamonds$Size, st_residuals_hw3_3)
+abline(2,0,col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+plot(diamonds$Size, (((st_residuals_hw3_3)^2)^(1/2))^(1/2))
+abline(lm_data_residual_hw3_3$coefficients[1], lm_data_residual_hw3_3$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_hw3_3)
+qqline(st_residuals_hw3_3, col='red', lty='dashed')
+```
+\noindent And when we check our power of justification,
+
+```{r}
+
+par(mfrow=c(1,3))
+plot(diamonds$Size, st_residuals_hw3_3)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=0.32, col='blue', lty='dashed')
+
+plot(diamonds$Size, hatvalues_hw3_3)
+abline(4/length(diamonds$Size),0, col='red', lty='dashed')
+abline(v=0.32, col='blue', lty='dashed')
+
+plot(diamonds$Size, cooks.distance(lm_data_hw3_3))
+abline(4/(length(diamonds$Size)-2),0,col='red', lty='dashed')
+
+```
+
+\noindent Thus, they don't have any bad leverage points.  
+If we eliminate values having 'big' cook's distance,
+
+```{r}
+
+cooks.distance(lm_data_hw3_3)[cooks.distance(lm_data_hw3_3) > 4/(length(diamonds$Price)-2)]
+
+diamonds_improve <- diamonds[c(-4,-19,-42),]
+
+lm_data_improve_hw3_3 <- lm(diamonds_improve$Price~diamonds_improve$Size, data=diamonds_improve)
+
+plot(diamonds_improve$Size, diamonds_improve$Price)
+abline(lm_data_improve_hw3_3$coefficients[1], lm_data_improve_hw3_3$coefficients[2], col='red', lty='dashed')
+
+###
+
+s_improve_hw3_3 <- (sum((lm_data_improve_hw3_3$residuals - mean(lm_data_improve_hw3_3$residuals))^2) / (length(diamonds_improve$Price)-2))^(1/2)
+
+hatvalues_improve_hw3_3 <- hatvalues(lm_data_improve_hw3_3)
+
+st_residuals_improve_hw3_3 <- lm_data_improve_hw3_3$residuals / (s_improve_hw3_3 * (1-hatvalues_improve_hw3_3)^(1/2))
+
+lm_data_residual_improve_hw3_3 <- lm((((st_residuals_improve_hw3_3)^2)^(1/2))^(1/2)~diamonds_improve$Size, data=diamonds_improve)
+
+###
+
+par(mfrow=c(1,3))
+plot(diamonds_improve$Size, st_residuals_improve_hw3_3)
+abline(2,0,col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+plot(diamonds_improve$Size, (((st_residuals_improve_hw3_3)^2)^(1/2))^(1/2))
+abline(lm_data_residual_improve_hw3_3$coefficients[1], lm_data_residual_improve_hw3_3$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_improve_hw3_3)
+qqline(st_residuals_improve_hw3_3, col='red', lty='dashed')
+
+```
+
+\noindent Then we can get this outcome. If we check the power of justification,
+
+```{r}
+
+par(mfrow=c(1,3))
+plot(diamonds_improve$Size, st_residuals_improve_hw3_3)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=0.29, col='blue', lty='dashed')
+
+plot(diamonds_improve$Size, hatvalues_improve_hw3_3)
+abline(4/length(diamonds_improve$Size),0, col='red', lty='dashed')
+abline(v=0.29, col='blue', lty='dashed')
+
+plot(diamonds_improve$Size, cooks.distance(lm_data_improve_hw3_3))
+abline(4/(length(diamonds_improve$Size)-2),0,col='red', lty='dashed')
+
+```
+
+### Part 1 - (b)
+
+\noindent The number of data are small.
+
+\newpage
+
+### Part 2 - (a)
+
+\noindent We can use $\log$-scale SLR model.
+
+```{r}
+
+lm_data_log_hw3_3 <- lm(log(diamonds$Price)~log(diamonds$Size), data=diamonds)
+
+plot(log(diamonds$Size), log(diamonds$Price))
+abline(lm_data_log_hw3_3$coefficients[1], lm_data_log_hw3_3$coefficients[2], col='red', lty='dashed')
+
+###
+
+s_log_hw3_3 <- (sum((lm_data_log_hw3_3$residuals - mean(lm_data_log_hw3_3$residuals))^2) / (length(diamonds$Price)-2))^(1/2)
+
+hatvalues_log_hw3_3 <- hatvalues(lm_data_log_hw3_3)
+
+st_residuals_log_hw3_3 <- lm_data_log_hw3_3$residuals / (s_log_hw3_3 * (1-hatvalues_log_hw3_3)^(1/2))
+
+lm_data_residual_log_hw3_3 <- lm((((st_residuals_log_hw3_3)^2)^(1/2))^(1/2)~log(diamonds$Size), data=diamonds)
+
+###
+
+par(mfrow=c(1,3))
+plot(log(diamonds$Size), st_residuals_log_hw3_3)
+abline(2,0,col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+plot(log(diamonds$Size), (((st_residuals_log_hw3_3)^2)^(1/2))^(1/2))
+abline(lm_data_residual_log_hw3_3$coefficients[1], lm_data_residual_log_hw3_3$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_log_hw3_3)
+qqline(st_residuals_log_hw3_3, col='red', lty='dashed')
+
+```
+
+\noindent When we check the power of justification,
+
+```{r}
+
+par(mfrow=c(1,3))
+plot(log(diamonds$Size), st_residuals_log_hw3_3)
+abline(2, 0, col='red', lty='dashed')
+abline(-2, 0, col='red', lty='dashed')
+abline(v=-1.15, col='blue', lty='dashed')
+
+plot(log(diamonds$Size), hatvalues_log_hw3_3)
+abline(4/length(diamonds$Size),0, col='red', lty='dashed')
+abline(v=-1.15, col='blue', lty='dashed')
+
+plot(log(diamonds$Size), cooks.distance(lm_data_log_hw3_3))
+abline(4/(length(diamonds$Size)-2),0,col='red', lty='dashed')
+
+```
+
+\noindent Thus, there are no bad leverage points.  
+If we eliminate the data having big cook's distance,
+
+```{r}
+cooks.distance(lm_data_log_hw3_3)[cooks.distance(lm_data_log_hw3_3) > 4/(length(diamonds$Size)-2)]
+```
+
+```{r}
+
+diamonds_log_improve <- diamonds[c(-4),]
+
+lm_data_log_improve_hw3_3 <- lm(log(diamonds_log_improve$Price)~log(diamonds_log_improve$Size), data=diamonds_log_improve)
+
+plot(log(diamonds_log_improve$Size), log(diamonds_log_improve$Price))
+abline(lm_data_log_improve_hw3_3$coefficients[1], lm_data_log_improve_hw3_3$coefficients[2], col='red', lty='dashed')
+
+###
+
+s_log_improve_hw3_3 <- (sum((lm_data_log_improve_hw3_3$residuals - mean(lm_data_log_improve_hw3_3$residuals))^2) / (length(diamonds_log_improve$Price)-2))^(1/2)
+
+hatvalues_log_improve_hw3_3 <- hatvalues(lm_data_log_improve_hw3_3)
+
+st_residuals_log_improve_hw3_3 <- lm_data_log_improve_hw3_3$residuals / (s_log_improve_hw3_3 * (1-hatvalues_log_improve_hw3_3)^(1/2))
+
+lm_data_residual_log_improve_hw3_3 <- lm((((st_residuals_log_improve_hw3_3)^2)^(1/2))^(1/2)~log(diamonds_log_improve$Size), data=diamonds_log_improve)
+
+###
+
+par(mfrow=c(1,3))
+plot(log(diamonds_log_improve$Size), st_residuals_log_improve_hw3_3)
+abline(2,0,col='red', lty='dashed')
+abline(-2,0,col='red', lty='dashed')
+
+plot(log(diamonds_log_improve$Size), (((st_residuals_log_improve_hw3_3)^2)^(1/2))^(1/2))
+abline(lm_data_residual_log_improve_hw3_3$coefficients[1], lm_data_residual_log_improve_hw3_3$coefficients[2], col='red', lty='dashed')
+
+qqnorm(st_residuals_log_improve_hw3_3)
+qqline(st_residuals_log_improve_hw3_3, col='red', lty='dashed')
+
+```
+
+### Part 2 - (b)
+
+\noindent The number of data are small.
+
+### Part 3
+
+\noindent Part B has a better model, because the regression of sum of squared of standardized residual is flatter.
+

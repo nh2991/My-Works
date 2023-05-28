@@ -1,0 +1,162 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Homework 4}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-02-14"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+## 1. 
+
+A paper company is interested in making its operations more efficient. They collect data on the total manufacturing \textbf{cost} per month (in dollars), the total production of \textbf{paper} per month (in tons), the total number of \textbf{machine} hours per month, the total variable \textbf{overhead} cost per month (in thousands of dollars) and the total number of \textbf{labor} hours each month.
+
+\newpage
+
+### (a) Explore the relationship among the variables:
+
+* Generate a correlation coefficient matrix. Try cor(data) in R.  
+* Generate a scatter plot matrix. Try pairs(data) in R.  
+* What do you feel about the relationship among the variables? Comment.  
+
+```{r}
+
+paper <- read.table("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/papercompany.txt", header=T)
+
+cor(paper)
+pairs(paper)
+
+```
+
+  
+\noindent It means that, LABOR does something different role, whereas four variables are correlated.
+
+\newpage
+
+### (b) Fit a multiple regression using \textbf{cost} as the response variable, and the other four variables as explanatory variables. Write down the regression equation.
+
+\noindent Let $Y = \text{COST}, ~X_1 = \text{PAPER}, ~X_2 = \text{MACHINE}, ~X_3 = \text{OVERHEAD}, ~X_4 = \text{LABOR}$
+
+```{r}
+
+lm_data_hw4_1 <- lm(COST~PAPER+MACHINE+OVERHEAD+LABOR, data=paper)
+
+summary(lm_data_hw4_1)
+
+```
+
+  
+\noindent Thus, $Y = 51.72314 + 0.94794 \hat{\beta_1} + 2.47104 \hat{\beta_2} + 0.04834 \hat{\beta_3} - 0.05058 \hat{\beta_4}$.
+
+### (c) Conduct the F-test for the overall fit of the regression. What conclusions can you draw?
+
+```{r}
+
+anova(lm_data_hw4_1)
+
+```
+
+  
+\noindent Thus, for $X_1$(PAPER) and $X_2$(MACHINE), the null hypotheses $H_0 : \beta_1 = \beta_2 = \beta_3 = \beta_4 = 0$ are rejected.
+
+\newpage
+
+### (d) What proportion of the variation in cost has been explained by the regression?
+
+  
+\noindent In (b), $R^2 = 0.9988$. Thus, 99.88\% can be explained by the regression.
+
+### (e) Test each of the individual regression coefficients. Interpret the result for each test. Which of the variables are significant?
+
+    
+\noindent In (b), for each $X_i$ for $i=1,~2,~3,~4$,  
+$H_0 : \beta_1|x_2,x_3,x_4 = 0$ vs. $H_1 : \beta_1|x_2,x_3,x_4 \neq 0$  
+$H_0 : \beta_2|x_1,x_3,x_4 = 0$ vs. $H_1 : \beta_2|x_1,x_3,x_4 \neq 0$  
+$H_0 : \beta_3|x_1,x_2,x_4 = 0$ vs. $H_1 : \beta_3|x_1,x_2,x_4 \neq 0$  
+$H_0 : \beta_4|x_1,x_2,x_3 = 0$ vs. $H_1 : \beta_4|x_1,x_2,x_3 \neq 0$  
+
+\vspace{4mm}
+\noindent Then, we can't say that $\beta_1 | x_2,x_3,x_4 = 0$ and $\beta_2 | x_1,x_3,x_4 = 0$ for $\alpha = 0.001$.
+
+### (f) Perform a partial F-test to determine whether the variables associated with 'overhead' and 'laber' hours can be removed from the model. Comment on the results of the test.
+
+\noindent First of all, $H_0 : Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_4 x_4 + e$ vs.  
+$H_1 : Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 + e$.
+
+```{r}
+
+lm_data_hw4_4 <- lm(COST~PAPER+MACHINE+LABOR, data=paper)
+
+anova(lm_data_hw4_4, lm_data_hw4_1)
+
+```
+\noindent Thus, $p$-value = 0.9275 > 0.05, so that we can't reject the null.  
+It means that we cannot say that the full model is better.
+
+\vspace{4mm}
+\noindent If we remove the 'Labor', $H_0 : Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + e$ vs.  
+$H_1 : Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \beta_4 x_4 + e$.
+
+```{r}
+
+lm_data_hw4_5 <- lm(COST~PAPER+MACHINE+OVERHEAD, data=paper)
+
+anova(lm_data_hw4_5, lm_data_hw4_1)
+
+
+```
+\noindent Then $p$-value = 0.2226 > 0.05, so that we can't reject the null.  
+It means that we cannot say that the full model is better.
+
+\newpage
+
+## 2. Exercise 5.4.3
+  
+\noindent Quality of vintage($Y$) = on a scale from 1 (worst) to 5 (best) with some half points.  
+End of harvest($X_1$) = measured as the number days since August 31.  
+Rain($X_2$) = a dummy variable for unwanted rain at harvest = 1 if yes.  
+
+\vspace{4mm}
+\noindent The model is $Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 * X_2 + e$.
+
+### (a) Show that the coefficient of the interaction term in moedl is statistically significant. In other words, show that the rate of change in quality rating depends on whether there has been any unwanted rain at vintage.
+
+```{r}
+
+wine <- read.table("/Users/user/Desktop/Yonsei/Junior/3-2/Introduction to Data Analysis and Regression/latour.txt", header=T)
+
+lm_data_hw4_2 <- lm(Quality~EndofHarvest+Rain+EndofHarvest*Rain, data=wine)
+summary(lm_data_hw4_2)
+
+```
+
+\noindent Thus, the coefficient of the interaction term($\beta_3$) has $p$-value 0.012 < 0.025, so that it is statistically significant for $\alpha = 0.05$.
+
+### (b) Estimate the number of days of delay to the end of harvest it takes to decrease the quality rating by 1 point when there is:
+
+\noindent (i) No unwanted rain at harvest($X_4 = 0$)   
+(ii) Some unwanted rain at harvest($X_4 \neq 0$)  
+
+```{r}
+
+lm_data_hw4_3 <- lm(Quality~EndofHarvest+Rain, data=wine)
+summary(lm_data_hw4_3)
+
+```
+
+\noindent (i) Thus, $Y = 6.14633 - 0.05723 X_1 - 1.62219 X_2$.  
+Then, claim $Y-1 = 6.14633 - 0.05723 (X_1 + k) - 1.62219 X_2$.  
+$\rightarrow~1 = 0.05723 k,~k \approx 17.473$.
+
+\vspace{4mm}
+\noindent (ii) $Y = 5.16122 - 0.03145 X_1 + 1.7867 X_2 - 0.08314 X_3$.  
+Then, claim $Y-1 = 5.16122 - 0.03145 (X_1 + k) + 1.7867 X_2 - 0.08314 X_3$.  
+$\rightarrow~1 = 0.03145 k,~k \approx 31.797$.
