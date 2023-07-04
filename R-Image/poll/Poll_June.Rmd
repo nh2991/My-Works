@@ -1,0 +1,78 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+---
+title: \textbf{Poll of May}
+author: "Juwon Lee, Economics and Statistics, UCLA"
+date: "2023-05-30"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+
+tinytex::install_tinytex()
+
+```{r}
+
+poll <- read.csv("/Users/user/Desktop/Yonsei/Junior/R & Python Programming/3-2 SelfStudy/Others/poll/Poll_June.csv")
+
+library(tidyverse)
+
+```
+
+```{r}
+
+ggplot(data=poll, aes(x=President.Bad, y=Theminjoo, colour=Institute, size=Day)) +
+  theme_set(theme_grey(base_family='AppleGothic')) +
+  geom_point() +
+  geom_smooth(method=loess, se=T, fullrange=F, linewidth=1, 
+              color='skyblue', alpha=0.3, fill='lightblue') +
+  geom_text(aes(label=Theminjoo, vjust=-0.8, hjust=0)) + 
+  guides(col=guide_legend(ncol=2)) +
+  theme(legend.position='right') + 
+  labs(title='대통령 부정평가와 더불어민주당 지지율', subtitle='2023년 6월', 
+       x='대통령 부정평가 (%)', y='더불어민주당 (%)', caption='연세대학교 경제학과, 응용통계학과 이주원')
+
+```
+
+```{r}
+
+ggplot(data=poll, aes(x=President.Good, y=PPP, colour=Institute, size=Day)) +
+  theme_set(theme_grey(base_family='AppleGothic')) +
+  geom_point() +
+  geom_smooth(method=loess, se=T, fullrange=F, linewidth=1, 
+              color='skyblue', alpha=0.3, fill='lightblue') +
+  geom_text(aes(label=PPP, vjust=-0.8, hjust=0)) + 
+  guides(col=guide_legend(ncol=2)) +
+  theme(legend.position='right') + 
+  labs(title='대통령 긍정평가와 국민의힘 지지율', subtitle='2023년 6월', 
+       x='대통령 긍정평가 (%)', y='국민의힘 (%)', caption='연세대학교 경제학과, 응용통계학과 이주원')
+
+```
+
+```{r}
+ggplot(data=poll, aes(x=PPP, y=Theminjoo, colour=Institute, size=Day)) +
+  theme_set(theme_grey(base_family='AppleGothic')) +
+  geom_point() +
+  geom_text(aes(label=round(Theminjoo-PPP,2), vjust=-0.8, hjust=0)) + 
+  geom_abline(slope=1, intercept=0.2, linewidth=1, alpha=0.25, color='red') +
+  guides(col=guide_legend(ncol=2)) +
+  labs(title='더불어민주당과 국민의힘 지지율', subtitle='2023년 6월\n\n(더불어민주당 - 국민의힘) (%)', 
+       y='더불어민주당 (%)', x='국민의힘 (%)', caption='연세대학교 경제학과, 응용통계학과 이주원')
+
+```
+
+```{r}
+
+ggplot(data=poll, aes(x=President.Good, y=President.Bad, colour=Institute, size=Day)) +
+  theme_set(theme_grey(base_family='AppleGothic')) +
+  geom_point() +
+  geom_text(aes(label=round(President.Bad-President.Good,2), vjust=-0.8, hjust=0)) + 
+  guides(col=guide_legend(ncol=2)) +
+  labs(title='대통령 긍정평가와 부정평가', subtitle='2023년 6월\n\n(부정평가 - 긍정평가) (%)', 
+       y='부정평가 (%)', x='긍정평가 (%)', caption='연세대학교 경제학과, 응용통계학과 이주원')
+
+```
